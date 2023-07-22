@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MetaPlayer</title>
+  <link href="css/index.css" rel="stylesheet">
+  <script src="./window.js"></script>
+  <style>
+    .highlighted {
+      color: rgb(6, 197, 6);
+    }
+  </style>
+</head>
+<body>
+  <p id="small_gap">ㅤ</p>
+  <div class="navbar">
+    <a>MetaPlayer V1</a>
+  </div>
+  <div id="buttons">
+    <input type="file" id="fileInput" style="display:none;" accept="audio/*" multiple>
+    <button onclick="uploadFiles()">Upload Files</button>
+    <button onclick="playAudio()">Play Audio</button>
+    <button onclick="stopAudio()">Stop Audio</button>
+  </div>
+  <div id="center">
+    <!-- File names will be displayed here -->
+  </div>
+  
+
+  <script>
+    let audioFiles = [];
+    let activeAudioIndex = 0;
+    let currentAudio;
+
+    function uploadFiles() {
+      // Create a file input element
+      const fileInput = document.createElement("input");
+      fileInput.type = "file";
+      fileInput.accept = "audio/*";
+      fileInput.multiple = true;
+
+      // Add an event listener to detect when files are selected
+      fileInput.addEventListener("change", handleFileSelect, false);
+
+      // Simulate a click event to open the file dialog
+      fileInput.click();
+    }
+
+    function handleFileSelect(event) {
+      audioFiles = event.target.files;
+      const centerDiv = document.getElementById("center");
+
+      // Clear existing <h1> elements
+      centerDiv.innerHTML = "";
+
+      // Iterate through the selected files and create <h1> elements for each file name
+      for (const file of audioFiles) {
+        const h1Element = document.createElement("h1");
+        h1Element.textContent = file.name;
+        centerDiv.appendChild(h1Element);
+      }
+    }
+
+    function playAudio() {
+      // Check if there are audio files to play
+      if (audioFiles.length === 0) {
+        alert("No audio files selected!");
+        return;
+      }
+
+      // Wait for 5 seconds before playing the audio files
+      setTimeout(() => {
+        playNextAudio();
+      }, 6500); // 5000 milliseconds = 5 seconds
+    }
+
+    function playNextAudio() {
+      if (audioFiles.length === 0) {
+        // No audio files to play
+        return;
+      }
+
+      // Highlight the currently playing audio
+      const centerDiv = document.getElementById("center");
+      const h1Elements = centerDiv.querySelectorAll("h1");
+      if (h1Elements && h1Elements[activeAudioIndex]) {
+        h1Elements[activeAudioIndex].classList.add("highlighted");
+      }
+
+      currentAudio = new Audio(URL.createObjectURL(audioFiles[activeAudioIndex]));
+      currentAudio.addEventListener("ended", () => { 
+        const highlightedElement = document.querySelector(".highlighted");
+        if (highlightedElement) {
+          highlightedElement.classList.remove("highlighted");
+        }
+
+        activeAudioIndex = (activeAudioIndex + 1) % audioFiles.length;
+        setTimeout(playNextAudio, 100);
+      });
+
+      // Play the audio
+      currentAudio.play();
+    }
+
+    function stopAudio() {
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        activeAudioIndex = 0;
+        const highlightedElement = document.querySelector(".highlighted");
+        if (highlightedElement) {
+          highlightedElement.classList.remove("highlighted");
+        }
+      }
+    }
+  </script>
+</body>
+</html>
